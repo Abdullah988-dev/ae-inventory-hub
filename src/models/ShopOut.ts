@@ -1,0 +1,22 @@
+import mongoose, { Schema, Document, Model, Types } from "mongoose";
+
+export interface IShopOut extends Document {
+  product: Types.ObjectId;
+  quantity: number;
+  customerName?: string;
+  note?: string;
+  createdAt: Date;
+}
+
+const ShopOutSchema = new Schema<IShopOut>(
+  {
+    product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
+    quantity: { type: Number, required: true, min: 1 },
+    customerName: { type: String, trim: true },
+    note: { type: String, trim: true },
+  },
+  { timestamps: true }
+);
+
+export const ShopOut: Model<IShopOut> =
+  mongoose.models.ShopOut || mongoose.model<IShopOut>("ShopOut", ShopOutSchema);
