@@ -10,6 +10,7 @@ import { ShopInTable } from "@/components/shop-in/ShopInTable";
 export default function ShopInPage() {
   const [entries, setEntries] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -25,9 +26,17 @@ export default function ShopInPage() {
     if (res.ok) setProducts(data.data);
   }, []);
 
+  const fetchCategories = useCallback(async () => {
+    const res = await fetch("/api/categories");
+    const data = await res.json();
+    if (res.ok) setCategories(data.data);
+  }, []);
+
   useEffect(() => {
-    Promise.all([fetchEntries(), fetchProducts()]).finally(() => setIsLoading(false));
-  }, [fetchEntries, fetchProducts]);
+    Promise.all([fetchEntries(), fetchProducts(), fetchCategories()]).finally(() =>
+      setIsLoading(false)
+    );
+  }, [fetchEntries, fetchProducts, fetchCategories]);
 
   async function handleDelete(id: string) {
     const res = await fetch(`/api/shop-in/${id}`, { method: "DELETE" });
@@ -71,6 +80,7 @@ export default function ShopInPage() {
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         products={products}
+        categories={categories}
         onSuccess={fetchEntries}
       />
     </div>

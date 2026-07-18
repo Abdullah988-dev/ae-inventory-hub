@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import {
@@ -25,40 +25,69 @@ interface Option {
   name: string;
   sku: string;
   quantity: number;
+  category?: { _id: string; name: string };
+}
+
+interface CategoryOption {
+  _id: string;
+  name: string;
 }
 
 interface ShopOutModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   products: Option[];
+  categories: CategoryOption[];
   onSuccess: () => void;
 }
 
-export function ShopOutModal({ open, onOpenChange, products, onSuccess }: ShopOutModalProps) {
+function todayString() {
+  return new Date().toISOString().split("T")[0];
+}
+
+export function ShopOutModal({
+  open,
+  onOpenChange,
+  products,
+  categories,
+  onSuccess,
+}: ShopOutModalProps) {
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [productId, setProductId] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [customerName, setCustomerName] = useState("");
   const [note, setNote] = useState("");
+  const [date, setDate] = useState(todayString());
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const filteredProducts = useMemo(() => {
+    if (categoryFilter === "all") return products;
+    return products.filter((p) => p.category?._id === categoryFilter);
+  }, [products, categoryFilter]);
 
   const selectedProduct = products.find((p) => p._id === productId);
 
-  function resetForm() {
-    setProductId("");
-    setQuantity(1);
-    setCustomerName("");
-    setNote("");
-  }
+  useEffect(() => {
+    if (!open) {
+      setCategoryFilter("all");
+      setProductId("");
+      setQuantity(1);
+      setCustomerName("");
+      setNote("");
+      setDate(todayString());
+    }
+  }, [open]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!productId) return;
     setIsSubmitting(true);
 
     try {
       const res = await fetch("/api/shop-out", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product: productId, quantity, customerName, note }),
+        body: JSON.stringify({ product: productId, quantity, customerName, note, date }),
       });
 
       const data = await res.json();
@@ -69,7 +98,6 @@ export function ShopOutModal({ open, onOpenChange, products, onSuccess }: ShopOu
       }
 
       toast.success("Stock removed successfully");
-      resetForm();
       onOpenChange(false);
       onSuccess();
     } finally {
@@ -86,17 +114,46 @@ export function ShopOutModal({ open, onOpenChange, products, onSuccess }: ShopOu
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
+            <Label className="text-slate-300">Filter by Category (optional)</Label>
+            <Select
+              value={categoryFilter}
+              onValueChange={(value) => {
+                setCategoryFilter(value ?? "all");
+                setProductId("");
+              }}
+            >
+              <SelectTrigger className="border-slate-700 bg-slate-800/60 text-white">
+                <SelectValue placeholder="All categories" />
+              </SelectTrigger>
+              <SelectContent className="border-slate-700 bg-slate-800 text-white">
+                <SelectItem value="all">All categories</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label className="text-slate-300">Product</Label>
             <Select value={productId} onValueChange={(value) => setProductId(value ?? "")}>
               <SelectTrigger className="border-slate-700 bg-slate-800/60 text-white">
                 <SelectValue placeholder="Select product" />
               </SelectTrigger>
               <SelectContent className="border-slate-700 bg-slate-800 text-white">
-                {products.map((product) => (
-                  <SelectItem key={product._id} value={product._id}>
-                    {product.name} ({product.sku}) — {product.quantity} in stock
-                  </SelectItem>
-                ))}
+                {filteredProducts.length === 0 ? (
+                  <div className="px-2 py-4 text-center text-sm text-slate-500">
+                    No products in this category
+                  </div>
+                ) : (
+                  filteredProducts.map((product) => (
+                    <SelectItem key={product._id} value={product._id}>
+                      {product.name} ({product.sku}) — {product.quantity} in stock
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
             {selectedProduct && (
@@ -116,6 +173,17 @@ export function ShopOutModal({ open, onOpenChange, products, onSuccess }: ShopOu
               value={quantity}
               onChange={(e) => setQuantity(Number(e.target.value))}
               className="border-slate-700 bg-slate-800/60 text-white"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-slate-300">Date</Label>
+            <Input
+              type="date"
+              required
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="border-slate-700 bg-slate-800/60 text-white [color-scheme:dark]"
             />
           </div>
 

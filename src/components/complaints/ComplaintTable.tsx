@@ -1,5 +1,6 @@
 "use client";
 
+import { ForwardActions } from "./ForwardActions";
 import { CheckCircle2, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -80,22 +81,22 @@ export function ComplaintTable({
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
-                {showDoneButton && onMarkDone && (
-                  <button
-                    onClick={() => onMarkDone(c._id)}
-                    className="mr-3 text-slate-500 hover:text-emerald-400"
-                    title="Mark as Done"
-                  >
-                    <CheckCircle2 className="h-4 w-4" />
-                  </button>
-                )}
-                <button
-                  onClick={() => onDelete(c._id)}
-                  className="text-slate-500 hover:text-red-400"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </TableCell>
+  <div className="flex items-center justify-end gap-2">
+    <ForwardActions complaint={c} />
+    {showDoneButton && onMarkDone && (
+      <button
+        onClick={() => onMarkDone(c._id)}
+        className="text-slate-500 hover:text-emerald-400"
+        title="Mark as Done"
+      >
+        <CheckCircle2 className="h-4 w-4" />
+      </button>
+    )}
+    <button onClick={() => onDelete(c._id)} className="text-slate-500 hover:text-red-400">
+      <Trash2 className="h-4 w-4" />
+    </button>
+  </div>
+</TableCell>
             </TableRow>
           ))}
         </TableBody>

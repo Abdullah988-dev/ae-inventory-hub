@@ -10,6 +10,7 @@ const shopOutSchema = z.object({
   quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
   customerName: z.string().trim().optional(),
   note: z.string().trim().optional(),
+  date: z.string().optional(),
 });
 
 export async function GET() {
@@ -17,7 +18,8 @@ export async function GET() {
     await connectToDatabase();
     const entries = await ShopOut.find()
       .populate("product", "name sku")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     return NextResponse.json({ status: "ok", data: entries });
   } catch (error) {
@@ -42,7 +44,8 @@ export async function POST(req: NextRequest) {
 
     await connectToDatabase();
 
-    const { product, quantity, customerName, note } = parsed.data;
+    const { product, quantity, customerName, note, date } = parsed.data;
+    const entryDate = date ? new Date(date) : new Date();
 
     const session = await mongoose.startSession();
 
@@ -64,7 +67,7 @@ export async function POST(req: NextRequest) {
         await productDoc.save({ session });
 
         const entries = await ShopOut.create(
-          [{ product, quantity, customerName, note }],
+          [{ product, quantity, customerName, note, date: entryDate }],
           { session }
         );
         createdEntry = entries[0];

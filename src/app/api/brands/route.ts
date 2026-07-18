@@ -10,7 +10,8 @@ const brandSchema = z.object({
 export async function GET() {
   try {
     await connectToDatabase();
-    const brands = await Brand.find().sort({ name: 1 });
+    // Yahan .lean() add kar diya hai
+    const brands = await Brand.find().sort({ name: 1 }).lean();
     return NextResponse.json({ status: "ok", data: brands });
   } catch (error) {
     return NextResponse.json(

@@ -22,10 +22,12 @@ export async function GET(req: NextRequest) {
       ? { $or: [{ name: { $regex: search, $options: "i" } }, { sku: { $regex: search, $options: "i" } }] }
       : {};
 
+    // Yahan .lean() chain kar diya hai populate aur sort ke baad
     const products = await Product.find(filter)
       .populate("category", "name")
       .populate("brand", "name")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     return NextResponse.json({ status: "ok", data: products });
   } catch (error) {

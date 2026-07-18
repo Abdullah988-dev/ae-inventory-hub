@@ -10,7 +10,8 @@ const categorySchema = z.object({
 export async function GET() {
   try {
     await connectToDatabase();
-    const categories = await Category.find().sort({ name: 1 });
+    // Yahan .lean() add kar diya hai performance behtar karne ke liye
+    const categories = await Category.find().sort({ name: 1 }).lean();
     return NextResponse.json({ status: "ok", data: categories });
   } catch (error) {
     return NextResponse.json(

@@ -6,14 +6,11 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ComplaintModal } from "@/components/complaints/ComplaintModal";
 import { ComplaintTable } from "@/components/complaints/ComplaintTable";
-import { WhatsAppSendModal } from "@/components/complaints/WhatsAppSendModal";
 
 export default function ComplaintsPage() {
   const [complaints, setComplaints] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [whatsAppComplaint, setWhatsAppComplaint] = useState<any | null>(null);
-  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
 
   const fetchComplaints = useCallback(async () => {
     const res = await fetch("/api/complaints?status=registered");
@@ -25,10 +22,8 @@ export default function ComplaintsPage() {
     fetchComplaints().finally(() => setIsLoading(false));
   }, [fetchComplaints]);
 
-  function handleRegistered(complaint: any) {
+  function handleRegistered() {
     fetchComplaints();
-    setWhatsAppComplaint(complaint);
-    setIsWhatsAppModalOpen(true);
   }
 
   async function handleMarkDone(id: string) {
@@ -90,12 +85,6 @@ export default function ComplaintsPage() {
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         onSuccess={handleRegistered}
-      />
-
-      <WhatsAppSendModal
-        open={isWhatsAppModalOpen}
-        onOpenChange={setIsWhatsAppModalOpen}
-        complaint={whatsAppComplaint}
       />
     </div>
   );

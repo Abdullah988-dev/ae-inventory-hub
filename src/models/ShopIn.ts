@@ -5,6 +5,7 @@ export interface IShopIn extends Document {
   quantity: number;
   supplierName?: string;
   note?: string;
+  date: Date;
   createdAt: Date;
 }
 
@@ -14,6 +15,7 @@ const ShopInSchema = new Schema<IShopIn>(
     quantity: { type: Number, required: true, min: 1 },
     supplierName: { type: String, trim: true },
     note: { type: String, trim: true },
+    date: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );

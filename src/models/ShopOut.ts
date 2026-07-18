@@ -5,6 +5,7 @@ export interface IShopOut extends Document {
   quantity: number;
   customerName?: string;
   note?: string;
+  date: Date;
   createdAt: Date;
 }
 
@@ -14,6 +15,7 @@ const ShopOutSchema = new Schema<IShopOut>(
     quantity: { type: Number, required: true, min: 1 },
     customerName: { type: String, trim: true },
     note: { type: String, trim: true },
+    date: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );

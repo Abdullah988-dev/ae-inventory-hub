@@ -16,6 +16,7 @@ interface ShopOutEntry {
   quantity: number;
   customerName?: string;
   note?: string;
+  date?: string;
   createdAt: string;
 }
 
@@ -50,7 +51,7 @@ export function ShopOutTable({ entries, onDelete }: ShopOutTableProps) {
           {entries.map((entry) => (
             <TableRow key={entry._id} className="border-slate-800">
               <TableCell className="text-slate-400">
-                {new Date(entry.createdAt).toLocaleDateString()}
+                {new Date(entry.date ?? entry.createdAt).toLocaleDateString()}
               </TableCell>
               <TableCell className="font-medium text-white">
                 {entry.product?.name} <span className="text-slate-500">({entry.product?.sku})</span>
