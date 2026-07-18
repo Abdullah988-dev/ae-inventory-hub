@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { env } from "@/config/env";
+import { seedDefaultAdmin } from "@/lib/seedAdmin";
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -30,6 +31,7 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
 
   try {
     cached.conn = await cached.promise;
+    await seedDefaultAdmin();
   } catch (error) {
     cached.promise = null;
     throw error;
