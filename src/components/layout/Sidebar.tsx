@@ -10,6 +10,7 @@ import {
   ArrowUpFromLine,
   MessageSquareWarning,
   MessageSquareCheck,
+  Wallet,
   LogOut,
   X,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { label: "Inventory", href: "/dashboard/inventory", icon: Boxes },
   { label: "Shop In", href: "/dashboard/shop-in", icon: ArrowDownToLine },
   { label: "Shop Out", href: "/dashboard/shop-out", icon: ArrowUpFromLine },
+  { label: "Payment Details", href: "/dashboard/payment-details", icon: Wallet },
   { label: "Complaint Register", href: "/dashboard/complaints", icon: MessageSquareWarning },
   { label: "Complaint Done", href: "/dashboard/complaints-done", icon: MessageSquareCheck },
 ];
