@@ -14,6 +14,8 @@ interface ShopInEntry {
   _id: string;
   product: { _id: string; name: string; sku: string };
   quantity: number;
+  pricePerUnit?: number;
+  totalAmount?: number;
   supplierName?: string;
   note?: string;
   date?: string;
@@ -42,6 +44,8 @@ export function ShopInTable({ entries, onDelete }: ShopInTableProps) {
             <TableHead className="text-slate-400">Date</TableHead>
             <TableHead className="text-slate-400">Product</TableHead>
             <TableHead className="text-slate-400">Quantity</TableHead>
+            <TableHead className="text-slate-400">Price/Unit</TableHead>
+            <TableHead className="text-slate-400">Total</TableHead>
             <TableHead className="text-slate-400">Supplier</TableHead>
             <TableHead className="text-slate-400">Note</TableHead>
             <TableHead className="text-right text-slate-400">Actions</TableHead>
@@ -57,6 +61,12 @@ export function ShopInTable({ entries, onDelete }: ShopInTableProps) {
                 {entry.product?.name} <span className="text-slate-500">({entry.product?.sku})</span>
               </TableCell>
               <TableCell className="text-emerald-400">+{entry.quantity}</TableCell>
+              <TableCell className="text-slate-400">
+                Rs. {(entry.pricePerUnit ?? 0).toLocaleString()}
+              </TableCell>
+              <TableCell className="text-white">
+                Rs. {(entry.totalAmount ?? 0).toLocaleString()}
+              </TableCell>
               <TableCell className="text-slate-400">{entry.supplierName || "—"}</TableCell>
               <TableCell className="text-slate-400">{entry.note || "—"}</TableCell>
               <TableCell className="text-right">

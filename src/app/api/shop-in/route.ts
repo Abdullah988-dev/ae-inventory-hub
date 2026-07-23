@@ -8,6 +8,7 @@ import { Product } from "@/models/Product";
 const shopInSchema = z.object({
   product: z.string().min(1, "Product is required"),
   quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
+  pricePerUnit: z.coerce.number().min(0, "Price cannot be negative"),
   supplierName: z.string().trim().optional(),
   note: z.string().trim().optional(),
   date: z.string().optional(),
@@ -44,8 +45,9 @@ export async function POST(req: NextRequest) {
 
     await connectToDatabase();
 
-    const { product, quantity, supplierName, note, date } = parsed.data;
+    const { product, quantity, pricePerUnit, supplierName, note, date } = parsed.data;
     const entryDate = date ? new Date(date) : new Date();
+    const totalAmount = quantity * pricePerUnit;
 
     const session = await mongoose.startSession();
 
@@ -63,7 +65,7 @@ export async function POST(req: NextRequest) {
         await productDoc.save({ session });
 
         const entries = await ShopIn.create(
-          [{ product, quantity, supplierName, note, date: entryDate }],
+          [{ product, quantity, pricePerUnit, totalAmount, supplierName, note, date: entryDate }],
           { session }
         );
         createdEntry = entries[0];

@@ -54,6 +54,7 @@ export function ShopInModal({
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [productId, setProductId] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [pricePerUnit, setPricePerUnit] = useState(0);
   const [supplierName, setSupplierName] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(todayString());
@@ -64,11 +65,14 @@ export function ShopInModal({
     return products.filter((p) => p.category?._id === categoryFilter);
   }, [products, categoryFilter]);
 
+  const totalAmount = quantity * pricePerUnit;
+
   useEffect(() => {
     if (!open) {
       setCategoryFilter("all");
       setProductId("");
       setQuantity(1);
+      setPricePerUnit(0);
       setSupplierName("");
       setNote("");
       setDate(todayString());
@@ -84,7 +88,14 @@ export function ShopInModal({
       const res = await fetch("/api/shop-in", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product: productId, quantity, supplierName, note, date }),
+        body: JSON.stringify({
+          product: productId,
+          quantity,
+          pricePerUnit,
+          supplierName,
+          note,
+          date,
+        }),
       });
 
       const data = await res.json();
@@ -111,7 +122,7 @@ export function ShopInModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label className="text-slate-300">Filter by Category (optional)</Label>
+            <Label className="text-slate-300">Product Type / Category</Label>
             <Select
               value={categoryFilter}
               onValueChange={(value) => {
@@ -120,10 +131,10 @@ export function ShopInModal({
               }}
             >
               <SelectTrigger className="border-slate-700 bg-slate-800/60 text-white">
-                <SelectValue placeholder="All categories" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent className="border-slate-700 bg-slate-800 text-white">
-                <SelectItem value="all">All categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat._id} value={cat._id}>
                     {cat.name}
@@ -134,7 +145,7 @@ export function ShopInModal({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-300">Product</Label>
+            <Label className="text-slate-300">Product Name</Label>
             <Select value={productId} onValueChange={(value) => setProductId(value ?? "")}>
               <SelectTrigger className="border-slate-700 bg-slate-800/60 text-white">
                 <SelectValue placeholder="Select product" />
@@ -155,17 +166,38 @@ export function ShopInModal({
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-slate-300">Quantity Received</Label>
-            <Input
-              required
-              type="number"
-              min="1"
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              className="border-slate-700 bg-slate-800/60 text-white"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-slate-300">Quantity</Label>
+              <Input
+                required
+                type="number"
+                min="1"
+                value={quantity}
+                onChange={(e) => setQuantity(Number(e.target.value))}
+                className="border-slate-700 bg-slate-800/60 text-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-slate-300">Price per Unit</Label>
+              <Input
+                required
+                type="number"
+                step="0.01"
+                min="0"
+                value={pricePerUnit}
+                onChange={(e) => setPricePerUnit(Number(e.target.value))}
+                className="border-slate-700 bg-slate-800/60 text-white"
+              />
+            </div>
           </div>
+
+          {totalAmount > 0 && (
+            <p className="rounded-lg bg-indigo-500/10 px-3 py-2 text-sm text-indigo-300">
+              Total Amount: Rs. {totalAmount.toLocaleString()}
+            </p>
+          )}
 
           <div className="space-y-2">
             <Label className="text-slate-300">Date</Label>

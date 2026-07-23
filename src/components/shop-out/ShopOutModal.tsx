@@ -55,6 +55,7 @@ export function ShopOutModal({
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [productId, setProductId] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [pricePerUnit, setPricePerUnit] = useState(0);
   const [customerName, setCustomerName] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(todayString());
@@ -66,12 +67,14 @@ export function ShopOutModal({
   }, [products, categoryFilter]);
 
   const selectedProduct = products.find((p) => p._id === productId);
+  const totalAmount = quantity * pricePerUnit;
 
   useEffect(() => {
     if (!open) {
       setCategoryFilter("all");
       setProductId("");
       setQuantity(1);
+      setPricePerUnit(0);
       setCustomerName("");
       setNote("");
       setDate(todayString());
@@ -87,7 +90,14 @@ export function ShopOutModal({
       const res = await fetch("/api/shop-out", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product: productId, quantity, customerName, note, date }),
+        body: JSON.stringify({
+          product: productId,
+          quantity,
+          pricePerUnit,
+          customerName,
+          note,
+          date,
+        }),
       });
 
       const data = await res.json();
@@ -114,7 +124,7 @@ export function ShopOutModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label className="text-slate-300">Filter by Category (optional)</Label>
+            <Label className="text-slate-300">Product Type / Category</Label>
             <Select
               value={categoryFilter}
               onValueChange={(value) => {
@@ -123,10 +133,10 @@ export function ShopOutModal({
               }}
             >
               <SelectTrigger className="border-slate-700 bg-slate-800/60 text-white">
-                <SelectValue placeholder="All categories" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent className="border-slate-700 bg-slate-800 text-white">
-                <SelectItem value="all">All categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat._id} value={cat._id}>
                     {cat.name}
@@ -137,7 +147,7 @@ export function ShopOutModal({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-300">Product</Label>
+            <Label className="text-slate-300">Product Name</Label>
             <Select value={productId} onValueChange={(value) => setProductId(value ?? "")}>
               <SelectTrigger className="border-slate-700 bg-slate-800/60 text-white">
                 <SelectValue placeholder="Select product" />
@@ -163,18 +173,39 @@ export function ShopOutModal({
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-slate-300">Quantity to Remove</Label>
-            <Input
-              required
-              type="number"
-              min="1"
-              max={selectedProduct?.quantity}
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              className="border-slate-700 bg-slate-800/60 text-white"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-slate-300">Quantity</Label>
+              <Input
+                required
+                type="number"
+                min="1"
+                max={selectedProduct?.quantity}
+                value={quantity}
+                onChange={(e) => setQuantity(Number(e.target.value))}
+                className="border-slate-700 bg-slate-800/60 text-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-slate-300">Price per Unit</Label>
+              <Input
+                required
+                type="number"
+                step="0.01"
+                min="0"
+                value={pricePerUnit}
+                onChange={(e) => setPricePerUnit(Number(e.target.value))}
+                className="border-slate-700 bg-slate-800/60 text-white"
+              />
+            </div>
           </div>
+
+          {totalAmount > 0 && (
+            <p className="rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+              Total Amount: Rs. {totalAmount.toLocaleString()}
+            </p>
+          )}
 
           <div className="space-y-2">
             <Label className="text-slate-300">Date</Label>
@@ -188,7 +219,7 @@ export function ShopOutModal({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-300">Customer Name (optional)</Label>
+            <Label className="text-slate-300">Customer / Receiver (optional)</Label>
             <Input
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}

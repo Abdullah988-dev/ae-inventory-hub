@@ -3,6 +3,8 @@ import mongoose, { Schema, Document, Model, Types } from "mongoose";
 export interface IShopIn extends Document {
   product: Types.ObjectId;
   quantity: number;
+  pricePerUnit: number;
+  totalAmount: number;
   supplierName?: string;
   note?: string;
   date: Date;
@@ -13,6 +15,8 @@ const ShopInSchema = new Schema<IShopIn>(
   {
     product: { type: Schema.Types.ObjectId, ref: "Product", required: true },
     quantity: { type: Number, required: true, min: 1 },
+    pricePerUnit: { type: Number, required: true, min: 0, default: 0 },
+    totalAmount: { type: Number, required: true, min: 0, default: 0 },
     supplierName: { type: String, trim: true },
     note: { type: String, trim: true },
     date: { type: Date, default: Date.now },
